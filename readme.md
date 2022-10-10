@@ -47,5 +47,9 @@ tbd (gitlab ci?)
 npx wrangler publish ./src/index.ts
 ```
 
+### custom domain
+
+- https://developers.cloudflare.com/workers/platform/routing/custom-domains/
+
 ## docs
 - See: https://honojs.dev/docs/getting-started/cloudflare-workers/
