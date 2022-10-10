@@ -39,15 +39,25 @@ npx wrangler dev src/index.ts
 
 ## production deployment
 
-tbd (gitlab ci?)
+> should only deploy with CI/CD, for versioning purpose
 
+### CI/CD
 
-- https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
-- https://developers.cloudflare.com/workers/wrangler/configuration/
+For example to deploy version `0.0.1` of the api:
 
-env vars needed in gitlab ci:
+- in `package.json` bumb `version` to `0.0.1`, then push this as a comit
+- in gitlab UI create a new tag `v0.0.1`
+- this will trigger the `deploy_api` job (see file `.gitlab-ci.yml`), which will publish the api to cloudflare workers (using wrangler)
+
+ENV variables needed in gitlab ci:
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+
+> note: these variables are defined on the gitlab organisation level and only availabe on protected branches (`main`) and tags (`v*`).
+
+Docs:
+- https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
+- https://developers.cloudflare.com/workers/wrangler/configuration/
 
 ### Manually
 
