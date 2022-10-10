@@ -8,8 +8,8 @@
   },
   "private": true,
   "scripts": {
-    "start": "./node_modules/.bin/wrangler dev src/index.ts",
-    "deploy": "./node_modules/.bin/wrangler publish src/index.ts"
+    "start": "wrangler dev src/index.ts",
+    "deploy": "wrangler publish src/index.ts"
   },
   "dependencies": {
     "@joblist/job-board-providers": "^0.0.17",
