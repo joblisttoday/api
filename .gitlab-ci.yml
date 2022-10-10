@@ -1,0 +1,16 @@
+# These folders are cached between builds
+# https://docs.gitlab.com/ce/ci/yaml/README.html#cache
+cache:
+  paths:
+    - node_modules/
+
+deploy_api_worker:
+  image: node:latest
+  variables:
+    NODE_ENV: "production"
+    VERBOSE: "true"
+  script:
+    - npm install
+    - npx wrangler deploy ./src/index.ts
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "main"

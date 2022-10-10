@@ -41,6 +41,14 @@ npx wrangler dev src/index.ts
 
 tbd (gitlab ci?)
 
+
+- https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
+- https://developers.cloudflare.com/workers/wrangler/configuration/
+
+env vars needed in gitlab ci:
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
 ### Manually
 
 ```bash
@@ -48,6 +56,8 @@ npx wrangler publish ./src/index.ts
 ```
 
 ### custom domain
+
+> tld: do not add with the cloudflare DNS UI, but the cloudflare worker toml config file, as we're having our site DNS zone on cloudfalre (joblist.today)
 
 - https://developers.cloudflare.com/workers/platform/routing/custom-domains/
 
