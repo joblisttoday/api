@@ -11,6 +11,6 @@ deploy_api_worker:
     VERBOSE: "true"
   script:
     - npm install
-    - npx wrangler deploy ./src/index.ts
+    - npx wrangler publish ./src/index.ts
   rules:
     - if: $CI_COMMIT_REF_NAME == "main"
