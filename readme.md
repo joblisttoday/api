@@ -63,3 +63,10 @@ npx wrangler publish ./src/index.ts
 
 ## docs
 - See: https://honojs.dev/docs/getting-started/cloudflare-workers/
+
+
+### Tests
+
+Not yet setup, see here:
+- https://github.com/honojs/hono-minimal
+- https://honojs.dev/docs/getting-started/cloudflare-workers

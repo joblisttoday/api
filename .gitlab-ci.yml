@@ -11,7 +11,7 @@ deploy_api:
     VERBOSE: "true"
   script:
     - npm install
-    - npx wrangler publish ./src/index.ts
+    - npm run deploy
   rules:
     # - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/'
     - if: $CI_COMMIT_REF_NAME == "main"
@@ -23,6 +23,6 @@ test_api:
     VERBOSE: "true"
   script:
     - npm install
-    - npx wrangler test ./src/index.ts
+    - npm run test
   rules:
-    - if: $CI_COMMIT_REF_NAME == "main"
+    - if: $CI_COMMIT_REF_NAME == "feat/test"
