@@ -4,7 +4,7 @@ cache:
   paths:
     - node_modules/
 
-deploy_api_worker:
+deploy_api:
   image: node:latest
   variables:
     NODE_ENV: "production"
@@ -12,5 +12,16 @@ deploy_api_worker:
   script:
     - npm install
     - npx wrangler publish ./src/index.ts
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/'
+
+test_api:
+  image: node:latest
+  variables:
+    NODE_ENV: "production"
+    VERBOSE: "true"
+  script:
+    - npm install
+    - npx wrangler test ./src/index.ts
   rules:
     - if: $CI_COMMIT_REF_NAME == "main"
