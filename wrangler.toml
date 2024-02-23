@@ -1,5 +1,7 @@
 name = "api"
 compatibility_date = "2022-10-10"
+# node_compat = true
+# compatibility_flags = [ "nodejs_compat" ]
 routes = [
 	{ pattern = "api.joblist.today", custom_domain = true, zone_name = "joblist.today" }
 ]
