@@ -3,6 +3,18 @@ import initDb, { sqliteToJson } from "./utils/db.js";
 
 const sqliteRoute = new Hono();
 
+sqliteRoute.get("/", (c) => {
+	return c.json({
+		companies: "/companies",
+		"companies/:slug": "/companies/:slug",
+		jobs: "/jobs",
+		"jobs/:id": "/jobs/:id",
+		"heatmap/jobs": "/heatmap/jobs",
+		"heatmap/companies": "/heatmap/companies",
+		"heatmap/companies/:slug": "/heatmap/companies/:slug",
+	});
+});
+
 sqliteRoute.get("/companies", async (c) => {
 	const db = await initDb();
 	const res = await db.exec("SELECT * FROM companies");
