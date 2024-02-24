@@ -1,17 +1,17 @@
 {
-	"name": "api",
-	"version": "0.0.2",
-	"devDependencies": {
-		"wrangler": "^3.29.0"
-	},
-	"private": true,
-	"scripts": {
-		"start": "wrangler dev src/index.js",
-		"deploy": "wrangler publish src/index.js"
-	},
-	"dependencies": {
-		"@joblist/job-board-providers": "^0.1.0",
-		"cloudflare-worker-sqlite-wasm": "^0.0.1-alpha.5",
-		"hono": "^4.0.5"
-	}
+  "name": "api",
+  "version": "0.0.3",
+  "devDependencies": {
+    "wrangler": "^3.29.0"
+  },
+  "private": true,
+  "scripts": {
+    "start": "wrangler dev src/index.js",
+    "deploy": "wrangler deploy src/index.js"
+  },
+  "dependencies": {
+    "@joblist/job-board-providers": "^0.1.0",
+    "cloudflare-worker-sqlite-wasm": "^0.0.1-alpha.5",
+    "hono": "^4.0.5"
+  }
 }

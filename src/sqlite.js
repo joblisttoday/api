@@ -44,10 +44,19 @@ sqliteRoute.get("/heatmap/companies/:slug", async (c) => {
 	const res = await db.exec(
 		`
 WITH RECURSIVE date_range AS (
-  SELECT MIN(published_date) AS min_date, MAX(published_date) AS max_date FROM jobs
+  SELECT
+    MIN(published_date) AS min_date,
+    MAX(published_date) AS max_date
+  FROM jobs
   WHERE published_date > DATE('now', '-' || ? || ' ' || 'days')
+  AND company_slug = ?
+  OR company_slug is null
   UNION ALL
-  SELECT date(min_date, '+1 day'), max_date FROM date_range WHERE min_date < max_date
+  SELECT
+    date(min_date, '+1 day'),
+    max_date
+  FROM date_range
+  WHERE min_date < max_date
 )
 SELECT
   COALESCE(company_slug, ?) AS company_slug,
@@ -60,10 +69,7 @@ FROM
   date_range
 LEFT JOIN
   jobs ON date_range.min_date = jobs.published_date
-AND company_slug = ?
-OR company_slug is null
-GROUP BY 1,2
-ORDER BY published_date ASC
+GROUP BY 1,2;
 		`,
 		[days, slug, slug],
 	);
@@ -98,9 +104,7 @@ FROM
 LEFT JOIN
   jobs ON DATE(date_range.min_date) = DATE(jobs.published_date)
 GROUP BY
-  date_range.min_date
-ORDER BY
-  date_range.min_date ASC;
+  date_range.min_date;
 		`,
 		[days],
 	);

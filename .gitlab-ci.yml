@@ -11,7 +11,7 @@ deploy_api:
     VERBOSE: "true"
   script:
     - npm install
-    - npx wrangler publish src/index.js
+    - npx wrangler deploy src/index.js
     - ls -la
     - tar -czf /tmp/artifact.tar.gz .
     - mkdir public

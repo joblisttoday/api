@@ -13,8 +13,17 @@ import initSqljs from "cloudflare-worker-sqlite-wasm";
 const DATABASE_URL = "https://joblist.gitlab.io/workers/joblist.db";
 
 const initDb = async () => {
+	const fetchConfig = {
+		/* cloudflare cache */
+		cf: {
+			// Always cache this fetch regardless of content type
+			// for a max of 5 seconds before revalidating the resource
+			cacheTtl: 5,
+			cacheEverything: true,
+		},
+	};
 	try {
-		const databaseFile = await fetch(DATABASE_URL).then((res) =>
+		const databaseFile = await fetch(DATABASE_URL, fetchConfig).then((res) =>
 			res.arrayBuffer(),
 		);
 		const SQL = await initSqljs({
