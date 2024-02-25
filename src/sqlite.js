@@ -49,11 +49,13 @@ WITH RECURSIVE date_range AS (
     MAX(published_date) AS max_date
   FROM jobs
   WHERE published_date > DATE('now', '-' || ? || ' ' || 'days')
-  AND company_slug = ?
-  OR company_slug is null
+    AND company_slug = ?
+    AND company_slug IS NOT NULL
+
   UNION ALL
+
   SELECT
-    date(min_date, '+1 day'),
+    DATE(min_date, '+1 day'),
     max_date
   FROM date_range
   WHERE min_date < max_date
@@ -62,16 +64,17 @@ SELECT
   COALESCE(company_slug, ?) AS company_slug,
   date_range.min_date AS date,
   COALESCE(COUNT(DISTINCT ObjectId), 0) AS total,
-  strftime('%Y', date_range.min_date) AS year,
-  strftime('%w', date_range.min_date) AS dow,
-  strftime('%W', date_range.min_date) AS woy
-FROM
-  date_range
-LEFT JOIN
-  jobs ON date_range.min_date = jobs.published_date
+  STRFTIME('%Y', date_range.min_date) AS year,
+  STRFTIME('%w', date_range.min_date) AS dow,
+  STRFTIME('%W', date_range.min_date) AS woy
+FROM date_range
+LEFT JOIN jobs 
+  ON date_range.min_date = jobs.published_date
+    AND company_slug = ?
+    AND company_slug IS NOT NULL
 GROUP BY 1,2;
 		`,
-		[days, slug, slug],
+		[days, slug, slug, slug],
 	);
 	return c.json(sqliteToJson(res));
 });
