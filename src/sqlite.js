@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import initDb, { sqliteToJson } from "./utils/db.js";
 
 const sqliteRoute = new Hono();
