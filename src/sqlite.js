@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import initDb, { sqliteToJson } from "./utils/db.js";
 
+const DEFAULT_DAYS = 365;
+
 const sqliteRoute = new Hono();
 sqliteRoute.use("/*", cors());
 
@@ -39,22 +41,22 @@ sqliteRoute.get("/jobs/:id", async (c) => {
 	const res = await db.exec(`SELECT * FROM jobs WHERE objectId = ?`, [id]);
 	return c.json(sqliteToJson(res));
 });
-sqliteRoute.get("/heatmap/companies/:slug", async (c) => {
+sqliteRoute.get("/heatmap", async (c) => {
 	const db = await initDb();
-	const { slug } = c.req.param();
-	const days = c.req.query("days") || 365;
+	const days = c.req.query("days") || DEFAULT_DAYS;
 	const res = await db.exec(
-		`SELECT * FROM heatmap_agg WHERE date >= DATE('now', '-' || ? || ' ' || 'days') AND job_company_slug = ?`,
-		[days, slug],
+		`select count(*) as total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') GROUP BY date;`,
+		[days],
 	);
 	return c.json(sqliteToJson(res));
 });
-sqliteRoute.get("/heatmap/jobs", async (c) => {
+sqliteRoute.get("/heatmap/:slug", async (c) => {
 	const db = await initDb();
-	const days = c.req.query("days") || 365;
+	const { slug } = c.req.param();
+	const days = c.req.query("days") || DEFAULT_DAYS;
 	const res = await db.exec(
-		`SELECT date, day, month, year, doy, woy, total FROM heatmap_agg WHERE date >= DATE('now', '-' || ? || ' ' || 'days')`,
-		[days],
+		`select count(*) as total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') AND company_slug = ? GROUP BY date;`,
+		[days, slug],
 	);
 	return c.json(sqliteToJson(res));
 });
