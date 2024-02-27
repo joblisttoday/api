@@ -13,9 +13,8 @@ sqliteRoute.get("/", (c) => {
 		"companies/:slug": "/companies/:slug",
 		jobs: "/jobs",
 		"jobs/:id": "/jobs/:id",
-		"heatmap/jobs": "/heatmap/jobs",
-		"heatmap/companies": "/heatmap/companies",
-		"heatmap/companies/:slug": "/heatmap/companies/:slug",
+		heatmap: "/heatmap/jobs",
+		"heatmap/:slug": "/heatmap/:slug",
 	});
 });
 
