@@ -60,4 +60,38 @@ sqliteRoute.get("/heatmap/:slug", async (c) => {
 	return c.json(sqliteToJson(res));
 });
 
+sqliteRoute.get("/tags/companies", async (c) => {
+	const db = await initDb();
+	const res = await db.exec(`
+SELECT
+tag,
+COUNT(*) AS count
+FROM (
+  SELECT json_each.value AS tag
+  FROM companies, json_each(companies.tags)
+) AS tags
+		GROUP BY tag
+		`);
+	return c.json(sqliteToJson(res));
+});
+
+sqliteRoute.get("/tags/companies/:tag", async (c) => {
+	const db = await initDb();
+	const { tag } = c.req.param();
+	const days = c.req.query("days") || DEFAULT_DAYS;
+	const res = await db.exec(
+		`
+SELECT *
+FROM companies
+WHERE EXISTS (
+  SELECT 1
+  FROM json_each(companies.tags) AS tags
+  WHERE tags.value = ?
+);
+	`,
+		[tag],
+	);
+	return c.json(sqliteToJson(res));
+});
+
 export default sqliteRoute;
