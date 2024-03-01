@@ -14,10 +14,8 @@ const DATABASE_URL = "https://joblist.gitlab.io/workers/joblist.db";
 
 const initDb = async () => {
 	const fetchConfig = {
-		/* cloudflare cache */
 		cf: {
-			// Always cache this fetch regardless of content type
-			// for a max of 5 seconds before revalidating the resource
+			/* cloudflare cache */
 			cacheTtl: 25,
 			cacheEverything: true,
 		},
