@@ -18,22 +18,30 @@ sqliteRoute.get("/", (c) => {
 	});
 });
 
+sqliteRoute.get("/search/companies/:slug", async (c) => {
+	const db = await initDb();
+	const { slug } = c.req.param();
+	const query = c.req.query("query") || "";
+	const res = await db.exec(
+		`SELECT * FROM companies_fts WHERE slug = ? AND companies_fts MATCH ?`,
+		[slug, query],
+	);
+	return c.json(sqliteToJson(res));
+});
+
 sqliteRoute.get("/search/companies", async (c) => {
 	const db = await initDb();
 	const query = c.req.query("query") || "";
-	console.log("query", query);
 	const res = await db.exec(
 		`SELECT * FROM companies_fts WHERE companies_fts MATCH ?`,
 		[query],
 	);
-	console.log("res", res);
 	return c.json(sqliteToJson(res));
 });
 
 sqliteRoute.get("/search/jobs", async (c) => {
 	const db = await initDb();
 	const query = c.req.query("query") || "";
-	console.log("query", query);
 	const res = await db.exec(`SELECT * FROM jobs_fts WHERE jobs_fts MATCH ?`, [
 		query,
 	]);
