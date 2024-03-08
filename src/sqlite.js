@@ -13,7 +13,7 @@ const FRAGMENTS = {
 };
 const QUERIES = {
 	companies: `SELECT ${FRAGMENTS.company} FROM companies`,
-	company: "SELECT ${FRAGMENTS.company} FROM companies WHERE slug = ?",
+	company: `SELECT ${FRAGMENTS.company} FROM companies WHERE slug = ?`,
 	searchCompanies: "SELECT * FROM companies_fts WHERE companies_fts MATCH ?",
 	searchJobs: "SELECT * FROM jobs_fts WHERE jobs_fts MATCH ?",
 	searchCompanyJobs:
@@ -27,6 +27,11 @@ const QUERIES = {
 	tagsCompanies:
 		"SELECT tag, COUNT(*) AS count FROM (SELECT json_each.value AS tag FROM companies, json_each(companies.tags)) AS tags GROUP BY tag",
 	tagsCompany: `SELECT ${FRAGMENTS.company} FROM companies WHERE EXISTS (SELECT 1 FROM json_each(companies.tags) AS tags WHERE tags.value = ?)`,
+};
+
+const buildQuery = (name) => {
+	const query = QUERIES[name];
+	return query.toString();
 };
 
 sqliteRoute.get("/", (c) => {
