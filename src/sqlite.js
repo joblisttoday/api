@@ -2,10 +2,32 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import initDb, { sqliteToJson } from "./utils/db.js";
 
-const DEFAULT_DAYS = 365;
-
 const sqliteRoute = new Hono();
 sqliteRoute.use("/*", cors());
+
+const DEFAULT_DAYS = 365;
+
+const FRAGMENTS = {
+	company:
+		"*, JSON_EXTRACT(positions, '$') as positions, JSON_EXTRACT(tags, '$') as tags",
+};
+const QUERIES = {
+	companies: `SELECT ${FRAGMENTS.company} FROM companies`,
+	company: "SELECT ${FRAGMENTS.company} FROM companies WHERE slug = ?",
+	searchCompanies: "SELECT * FROM companies_fts WHERE companies_fts MATCH ?",
+	searchJobs: "SELECT * FROM jobs_fts WHERE jobs_fts MATCH ?",
+	searchCompanyJobs:
+		"SELECT * FROM jobs_fts WHERE company_slug = ? AND jobs_fts MATCH ?",
+	jobs: "SELECT * FROM jobs",
+	job: "SELECT * FROM jobs WHERE objectId = ?",
+	heatmap:
+		"SELECT count(*) AS total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') GROUP BY date",
+	heatmapCompany:
+		"SELECT count(*) AS total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') AND company_slug = ? GROUP BY date;",
+	tagsCompanies:
+		"SELECT tag, COUNT(*) AS count FROM (SELECT json_each.value AS tag FROM companies, json_each(companies.tags)) AS tags GROUP BY tag",
+	tagsCompany: `SELECT ${FRAGMENTS.company} FROM companies WHERE EXISTS (SELECT 1 FROM json_each(companies.tags) AS tags WHERE tags.value = ?)`,
+};
 
 sqliteRoute.get("/", (c) => {
 	return c.json({
@@ -21,19 +43,14 @@ sqliteRoute.get("/", (c) => {
 sqliteRoute.get("/search/companies", async (c) => {
 	const db = await initDb();
 	const query = c.req.query("query") || "";
-	const res = await db.exec(
-		`SELECT * FROM companies_fts WHERE companies_fts MATCH ?`,
-		[query],
-	);
+	const res = await db.exec(QUERIES.searchCompanies, [query]);
 	return c.json(sqliteToJson(res));
 });
 
 sqliteRoute.get("/search/jobs", async (c) => {
 	const db = await initDb();
 	const query = c.req.query("query") || "";
-	const res = await db.exec(`SELECT * FROM jobs_fts WHERE jobs_fts MATCH ?`, [
-		query,
-	]);
+	const res = await db.exec(QUERIES.searchJobs, [query]);
 	return c.json(sqliteToJson(res));
 });
 
@@ -41,67 +58,49 @@ sqliteRoute.get("/search/jobs/:slug", async (c) => {
 	const db = await initDb();
 	const { slug } = c.req.param();
 	const query = c.req.query("query") || "";
-	const res = await db.exec(
-		`SELECT * FROM jobs_fts WHERE company_slug = ? AND jobs_fts MATCH ?`,
-		[slug, query],
-	);
+	const res = await db.exec(QUERIES.searchCompanyJobs, [slug, query]);
 	return c.json(sqliteToJson(res));
 });
 
 sqliteRoute.get("/companies", async (c) => {
 	const db = await initDb();
-	const res = await db.exec("SELECT * FROM companies");
+	const res = await db.exec(QUERIES.companies);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/companies/:slug", async (c) => {
 	const db = await initDb();
 	const { slug } = c.req.param();
-	const res = await db.exec(`SELECT * FROM companies WHERE slug = ?`, [slug]);
+	const res = await db.exec(QUERIES.company, [slug]);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/jobs", async (c) => {
 	const db = await initDb();
-	const res = await db.exec("SELECT * FROM jobs");
+	const res = await db.exec(QUERIES.jobs);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/jobs/:id", async (c) => {
 	const db = await initDb();
 	const { id } = c.req.param();
-	const res = await db.exec(`SELECT * FROM jobs WHERE objectId = ?`, [id]);
+	const res = await db.exec(QUERIES.job, [id]);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/heatmap", async (c) => {
 	const db = await initDb();
 	const days = c.req.query("days") || DEFAULT_DAYS;
-	const res = await db.exec(
-		`select count(*) as total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') GROUP BY date;`,
-		[days],
-	);
+	const res = await db.exec(QUERIES.heatmap, [days]);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/heatmap/:slug", async (c) => {
 	const db = await initDb();
 	const { slug } = c.req.param();
 	const days = c.req.query("days") || DEFAULT_DAYS;
-	const res = await db.exec(
-		`select count(*) as total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') AND company_slug = ? GROUP BY date;`,
-		[days, slug],
-	);
+	const res = await db.exec(QUERIES.heatmapCompany, [days, slug]);
 	return c.json(sqliteToJson(res));
 });
 
 sqliteRoute.get("/tags/companies", async (c) => {
 	const db = await initDb();
-	const res = await db.exec(`
-SELECT
-tag,
-COUNT(*) AS count
-FROM (
-  SELECT json_each.value AS tag
-  FROM companies, json_each(companies.tags)
-) AS tags
-		GROUP BY tag
-		`);
+	const res = await db.exec(QUERIES.tagsCompanies);
 	return c.json(sqliteToJson(res));
 });
 
@@ -109,18 +108,7 @@ sqliteRoute.get("/tags/companies/:tag", async (c) => {
 	const db = await initDb();
 	const { tag } = c.req.param();
 	const days = c.req.query("days") || DEFAULT_DAYS;
-	const res = await db.exec(
-		`
-SELECT *
-FROM companies
-WHERE EXISTS (
-  SELECT 1
-  FROM json_each(companies.tags) AS tags
-  WHERE tags.value = ?
-);
-	`,
-		[tag],
-	);
+	const res = await db.exec(QUERIES.tagsCompany, [tag]);
 	return c.json(sqliteToJson(res));
 });
 
