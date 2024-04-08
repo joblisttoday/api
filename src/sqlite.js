@@ -13,17 +13,17 @@ const FRAGMENTS = {
 };
 const QUERIES = {
 	companies: `SELECT ${FRAGMENTS.company} FROM companies`,
-	company: `SELECT ${FRAGMENTS.company} FROM companies WHERE slug = ?`,
+	company: `SELECT ${FRAGMENTS.company} FROM companies WHERE id = ?`,
 	searchCompanies: "SELECT * FROM companies_fts WHERE companies_fts MATCH ?",
 	searchJobs: "SELECT * FROM jobs_fts WHERE jobs_fts MATCH ?",
 	searchCompanyJobs:
-		"SELECT * FROM jobs_fts WHERE company_slug = ? AND jobs_fts MATCH ?",
+		"SELECT * FROM jobs_fts WHERE company_id = ? AND jobs_fts MATCH ?",
 	jobs: "SELECT * FROM jobs",
 	job: "SELECT * FROM jobs WHERE objectId = ?",
 	heatmap:
-		"SELECT count(*) AS total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') GROUP BY date",
+		"SELECT count(*) AS total, company_id, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') GROUP BY date",
 	heatmapCompany:
-		"SELECT count(*) AS total, company_slug, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') AND company_slug = ? GROUP BY date;",
+		"SELECT count(*) AS total, company_id, published_date AS date FROM jobs WHERE published_date >= DATE('now', '-' || ? || ' ' || 'days') AND company_id = ? GROUP BY date;",
 	tagsCompanies:
 		"SELECT tag, COUNT(*) AS count FROM (SELECT json_each.value AS tag FROM companies, json_each(companies.tags)) AS tags GROUP BY tag",
 	tagsCompany: `SELECT ${FRAGMENTS.company} FROM companies WHERE EXISTS (SELECT 1 FROM json_each(companies.tags) AS tags WHERE tags.value = ?)`,
@@ -37,11 +37,11 @@ const buildQuery = (name) => {
 sqliteRoute.get("/", (c) => {
 	return c.json({
 		companies: "/companies",
-		"companies/:slug": "/companies/:slug",
+		"companies/:id": "/companies/:id",
 		jobs: "/jobs",
 		"jobs/:id": "/jobs/:id",
 		heatmap: "/heatmap/jobs",
-		"heatmap/:slug": "/heatmap/:slug",
+		"heatmap/:id": "/heatmap/:id",
 	});
 });
 
@@ -59,11 +59,11 @@ sqliteRoute.get("/search/jobs", async (c) => {
 	return c.json(sqliteToJson(res));
 });
 
-sqliteRoute.get("/search/jobs/:slug", async (c) => {
+sqliteRoute.get("/search/jobs/:id", async (c) => {
 	const db = await initDb();
-	const { slug } = c.req.param();
+	const { id } = c.req.param();
 	const query = c.req.query("query") || "";
-	const res = await db.exec(QUERIES.searchCompanyJobs, [slug, query]);
+	const res = await db.exec(QUERIES.searchCompanyJobs, [id, query]);
 	return c.json(sqliteToJson(res));
 });
 
@@ -72,10 +72,10 @@ sqliteRoute.get("/companies", async (c) => {
 	const res = await db.exec(QUERIES.companies);
 	return c.json(sqliteToJson(res));
 });
-sqliteRoute.get("/companies/:slug", async (c) => {
+sqliteRoute.get("/companies/:id", async (c) => {
 	const db = await initDb();
-	const { slug } = c.req.param();
-	const res = await db.exec(QUERIES.company, [slug]);
+	const { id } = c.req.param();
+	const res = await db.exec(QUERIES.company, [id]);
 	return c.json(sqliteToJson(res));
 });
 sqliteRoute.get("/jobs", async (c) => {
@@ -95,11 +95,11 @@ sqliteRoute.get("/heatmap", async (c) => {
 	const res = await db.exec(QUERIES.heatmap, [days]);
 	return c.json(sqliteToJson(res));
 });
-sqliteRoute.get("/heatmap/:slug", async (c) => {
+sqliteRoute.get("/heatmap/:id", async (c) => {
 	const db = await initDb();
-	const { slug } = c.req.param();
+	const { id } = c.req.param();
 	const days = c.req.query("days") || DEFAULT_DAYS;
-	const res = await db.exec(QUERIES.heatmapCompany, [days, slug]);
+	const res = await db.exec(QUERIES.heatmapCompany, [days, id]);
 	return c.json(sqliteToJson(res));
 });
 

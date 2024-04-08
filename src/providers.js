@@ -46,7 +46,7 @@ providersRoute.get("/:id/:hostname", async (c) => {
 		data = await provider.getJobs({
 			hostname,
 			companyTitle: hostname,
-			companySlug: hostname,
+			companyId: hostname,
 		});
 	} catch (error) {
 		console.log("Error fetching jobs", id, hostname);
