@@ -12,6 +12,11 @@ const FRAGMENTS = {
 		"*, JSON_EXTRACT(positions, '$') as positions, JSON_EXTRACT(tags, '$') as tags",
 };
 const QUERIES = {
+	stats: `
+		SELECT
+			(SELECT COUNT(*) FROM companies) AS total_companies,
+			(SELECT COUNT(*) FROM jobs) AS total_jobs
+	`,
 	companies: `SELECT ${FRAGMENTS.company} FROM companies`,
 	company: `SELECT ${FRAGMENTS.company} FROM companies WHERE id = ?`,
 	searchCompanies: "SELECT * FROM companies_fts WHERE companies_fts MATCH ?",
@@ -115,6 +120,12 @@ sqliteRoute.get("/tags/companies/:tag", async (c) => {
 	const days = c.req.query("days") || DEFAULT_DAYS;
 	const res = await db.exec(QUERIES.tagsCompany, [tag]);
 	return c.json(sqliteToJson(res));
+});
+
+sqliteRoute.get("/stats", async (c) => {
+	const db = await initDb();
+	const res = await db.exec(QUERIES.stats);
+	return c.json(sqliteToJson(res)[0]); // Extract first result object
 });
 
 export default sqliteRoute;
