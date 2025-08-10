@@ -1,0 +1,2 @@
+GITHUB_TOKEN="github_pat_123abc456def"
+STRIPE_WEBHOOK_SECRET="whsec_abc123efg456"

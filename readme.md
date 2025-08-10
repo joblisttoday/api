@@ -37,6 +37,25 @@ Run the development server
 npx wrangler dev src/index.ts
 ```
 
+## stripe + ngrok
+To receive stripe webhooks, don't forget to set the `.dev.vars` values, and:
+
+```bash
+ngrok http 8787 --hostname lively-promoted-lemming.ngrok-free.app
+```
+In Stripe add the webhook to `https://lively-promoted-lemming.ngrok-free.app/webhooks/stripe`
+
+To test the webhooks sending from stripe, need to [install and login
+the stripe
+cli](https://docs.stripe.com/stripe-cli?install-method=apt).
+
+while developing to send a test webhook, use:
+```bash
+stripe trigger payment_intent.succeeded
+stripe listen --forward-to https://lively-promoted-lemming.ngrok-free.app/webhooks/stripe
+```
+
+
 ## production deployment
 
 > should only deploy with CI/CD, for versioning purpose
