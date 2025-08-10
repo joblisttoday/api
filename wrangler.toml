@@ -5,3 +5,5 @@ compatibility_date = "2022-10-10"
 routes = [
 	{ pattern = "api.joblist.today", custom_domain = true, zone_name = "joblist.today" }
 ]
+[observability.logs]
+enabled = true
