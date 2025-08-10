@@ -60,8 +60,12 @@ stripe listen --forward-to https://lively-promoted-lemming.ngrok-free.app/webhoo
 
 > should only deploy with CI/CD, for versioning purpose
 
-### CI/CD
+### CI/CD 
 
+### github + cloudflare
+The repo si bound the the `main` branch on cloudflare which will rebuild on new commits.
+
+### gitlab (obsolete)
 For example to deploy version `0.0.1` of the api:
 
 - in `package.json` bumb `version` to `0.0.1`, then push this as a comit
