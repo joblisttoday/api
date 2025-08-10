@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "devDependencies": {
     "wrangler": "^3.109.2"
   },
