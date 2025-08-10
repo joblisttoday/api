@@ -19,7 +19,7 @@ app.onError((error, c) => {
 /* root route */
 app.get("/", (c) => {
 	return c.json({
-		message: "Welcome to the joblist api",
+		message: "Welcome to the joblist api (internal alpha)",
 		documentationUrl: "https://gitlab.com/joblist/api-wrangler",
 	});
 });
